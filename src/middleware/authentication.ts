@@ -17,23 +17,29 @@ export function authenticateToken(
             ApiError.unauthorized(userError.unauthorized)
         )
     }
-    const verifiedToken = jwt.verify(token, ACCESS_TOKEN)
-    if (verifiedToken && typeof verifiedToken == "object") {
-        User.findOne({_id: verifiedToken.userId})
-        .then((data) => {
-            if (!data) {
-                throw ApiError.internal(userError.notFound)
-            }
-            res.locals.user = verifiedToken.userId
-            next()
-        }).catch((err) => {
-            return res.status(500).json(
-                ApiError.internal(err.message)
+    try {
+        const verifiedToken = jwt.verify(token, ACCESS_TOKEN)
+        if (verifiedToken && typeof verifiedToken == "object") {
+            User.findOne({_id: verifiedToken.userId})
+            .then((data) => {
+                if (!data) {
+                    throw ApiError.internal(userError.notFound)
+                }
+                res.locals.user = verifiedToken.userId
+                next()
+            }).catch((err) => {
+                return res.status(500).json(
+                    ApiError.internal(err.message)
+                )
+            })
+        } else {
+            return res.status(403).json(
+                ApiError.forbidden(userError.forbidden)
             )
-        })
-    } else {
-        return res.status(403).json(
-            ApiError.forbidden(userError.forbidden)
+        }
+    } catch (err: any) {
+        return res.status(500).json(
+            ApiError.internal(err.message)
         )
     }
 }
