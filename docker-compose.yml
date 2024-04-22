@@ -1,0 +1,14 @@
+version: '3'
+
+services:
+  mongo:
+    image: mongo
+    container_name: typescriptMongoTemplateDB
+
+  app:
+    build: ./
+    container_name: typescriptMongoTemplate
+    depends_on:
+      - mongo
+    ports:
+      - 4000:4000
